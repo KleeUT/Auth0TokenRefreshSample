@@ -3,8 +3,8 @@ import createAuth0Client, {
   Auth0ClientOptions,
 } from "@auth0/auth0-spa-js";
 export const auth0Config = {
-  domain: "klee-test.au.auth0.com",
-  clientId: "kGJxD5Xh1gSXknJeH6uV9cjadmkZKP0B",
+  domain: "nibit.au.auth0.com",
+  clientId: "VFBqJ67Lz0E8y4DzGf4AegKUYyscEZTe", //Refreshtokentest
 };
 
 export const configureClient = async (): Promise<Auth0Client> => {

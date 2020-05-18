@@ -1,15 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { Auth0Client } from "@auth0/auth0-spa-js";
+import {
+  Auth0Client,
+  PopupLoginOptions,
+  PopupConfigOptions,
+} from "@auth0/auth0-spa-js";
 // import logo from "./logo.svg";
 import "./App.css";
 import { configureClient } from "./auth/auth0Client";
+import decodeToken from "jwt-decode";
 
+function RenderToken({ token }: { token: string | undefined }): JSX.Element {
+  if (!token) {
+    return <>No Token</>;
+  }
+  const decodedToken = decodeToken(token);
+  return <>{JSON.stringify(decodedToken)}</>;
+}
 function useAuth0(
   setErr: (e: string) => void
 ): {
-  login: () => void;
+  login: () => Promise<void>;
   logout: () => void;
   getTokenWithPopup: (setToken: (a: string) => void) => Promise<void>;
+  getTokenSilent: (setToken: (a: string) => void) => Promise<void>;
   getUser: (setUser: (a: string) => void) => Promise<void>;
   isAuthed: boolean;
 } {
@@ -23,17 +36,21 @@ function useAuth0(
         setClient(auth0Client);
       } catch (e) {
         console.error(e);
-        setErr(e);
       }
     }
     auth();
   }, []);
 
-  function login() {
-    console.log("login start");
-
-    client?.loginWithPopup({});
-    console.log("login done");
+  async function login() {
+    try {
+      console.log("login start");
+      // const opts: PopupLoginOptions = {};
+      // const confs: PopupConfigOptions;
+      await client?.loginWithPopup(undefined, { timeoutInSeconds: 15 });
+      console.log("login done");
+    } catch (e) {
+      console.log(e);
+    }
   }
   async function getTokenWithPopup(
     setToken: (a: string) => void
@@ -41,6 +58,17 @@ function useAuth0(
     const token = await client?.getTokenWithPopup();
     setToken(token || "Not Yet");
   }
+  async function getTokenSilent(setToken: (a: string) => void): Promise<void> {
+    try {
+      console.log("Shhhhh! need a token");
+      const token = await client?.getTokenSilently();
+      console.log("SHHH got token ");
+      setToken(token || "Not Yet");
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   function logout() {
     client?.logout();
   }
@@ -51,6 +79,7 @@ function useAuth0(
   return {
     login,
     getTokenWithPopup,
+    getTokenSilent,
     logout,
     isAuthed,
     getUser,
@@ -65,6 +94,7 @@ function SpaFramework() {
   return (
     <div className="App">
       <h1>Hello</h1>
+      <p style={{ color: "red" }}>{err}</p>
       <button onClick={authProxy.login}>Login</button>
       <button>Refresh</button>
       <button onClick={authProxy.logout}>Logout</button>
@@ -83,9 +113,13 @@ function SpaFramework() {
       <div>
         <h1>Token</h1>
         <button onClick={() => authProxy.getTokenWithPopup(setToken)}>
-          Token
+          Token Popup
+        </button>
+        <button onClick={() => authProxy.getTokenSilent(setToken)}>
+          Token Silent
         </button>
         <p>{token}</p>
+        <RenderToken token={token} />
       </div>
     </div>
   );

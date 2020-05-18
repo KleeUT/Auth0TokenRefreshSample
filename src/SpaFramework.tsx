@@ -93,14 +93,14 @@ function SpaFramework() {
   const authProxy = useAuth0(setErr);
   return (
     <div className="App">
-      <h1>Hello</h1>
+      <h1>Login first</h1>
       <p style={{ color: "red" }}>{err}</p>
+
       <button onClick={authProxy.login}>Login</button>
-      <button>Refresh</button>
       <button onClick={authProxy.logout}>Logout</button>
       <hr />
       <div>
-        <h1>User</h1>
+        <h1>User Information</h1>
         <button
           onClick={() => {
             authProxy.getUser(setUser);
@@ -111,10 +111,17 @@ function SpaFramework() {
         <p>{JSON.stringify(user)}</p>
       </div>
       <div>
-        <h1>Token</h1>
+        <h1>Tokens</h1>
+        <p>
+          Pop up a new window that will get a token an then display it below
+        </p>
         <button onClick={() => authProxy.getTokenWithPopup(setToken)}>
           Token Popup
         </button>
+        <p>
+          If you're already logged in there is no need for a popup, you can
+          refresh the token
+        </p>
         <button onClick={() => authProxy.getTokenSilent(setToken)}>
           Token Silent
         </button>
